@@ -1,6 +1,7 @@
 SELECT
 	rev_id,
 	rev_parent,
+	rev_user_text,
 	rev_timestamp,
 	rev_page
 FROM
