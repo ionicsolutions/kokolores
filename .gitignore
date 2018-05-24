@@ -2,8 +2,10 @@
 *.manifest
 *.log
 
+# Toolforge specifics
 .bash_history
 env/
 .kube/
 .cache/
+replica.my.cnf
 www/python/venv/
