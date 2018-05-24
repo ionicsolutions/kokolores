@@ -1,3 +1,7 @@
+*.yaml
+*.manifest
+*.log
+
 .bash_history
 env/
 .kube/
