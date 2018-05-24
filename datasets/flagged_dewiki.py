@@ -1,6 +1,6 @@
 import toolforge
 import pymysql.cursors
-from datasets.reverts import get_all_reverted
+from reverts import get_all_reverted
 
 # Load SQL query for all manually approved revisions
 # based on https://quarry.wmflabs.org/query/27156
@@ -24,13 +24,13 @@ dataset = []
 try:
     with conn.cursor() as cursor:
         # Find all manually approved revisions
-        cursor.execute(manually_reviewed, {"page_id": 999397, "row_limit": 5})
+        cursor.execute(manually_reviewed, {"page_id": 999397, "row_limit": 5000})
         conn.commit()
         result = cursor.fetchall()
         dataset.extend([(item["rev_id"], True) for item in result])
 
         # Find all candidates for revisions which were not approved, but reverted
-        cursor.execute(potentially_reverted, {"page_id": 999397, "row_limit": 5})
+        cursor.execute(potentially_reverted, {"page_id": 999397, "row_limit": 5000})
         conn.commit()
         result = cursor.fetchall()
         candidates = [item["rev_id"] for item in result]
@@ -44,3 +44,5 @@ try:
 
 finally:
     conn.close()
+
+print(dataset)
