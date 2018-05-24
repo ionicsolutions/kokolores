@@ -3,7 +3,7 @@ import mwreverts
 
 from itertools import islice
 
-my_agent = 'kokolores dataset creator <kilian.kluge@wikipedia.de>'
+my_agent = 'kokolores dataset creator <kokolores.datasets@tools.wmflabs.org>'
 session = mwapi.Session('https://de.wikipedia.org',
                         formatversion=2,
                         user_agent=my_agent)

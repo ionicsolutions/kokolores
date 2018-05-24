@@ -1,12 +1,12 @@
 SELECT 
 	rev_id,
-	rev_parent,
+	rev_parent_id,
 	rev_timestamp,
 	rev_page
 FROM (
   SELECT
  	rev_id,
- 	rev_parent,
+ 	rev_parent_id,
     rev_timestamp,
     rev_page
   FROM

@@ -16,15 +16,23 @@ with open("queries/potentially_reverted.sql", "r") as queryfile:
 with open("queries/all_revisions.sql", "r") as queryfile:
     all_revisions = queryfile.read()
 
-conn = toolforge.connect("dewiki_p", cursor=pymysql.cursors.DictCursor)
+conn = toolforge.connect("dewiki_p", cursorclass=pymysql.cursors.DictCursor)
 
 try:
     with conn.cursor() as cursor:
-        cursor.execute(manually_reviewed, {"page_id": 999397, "row_limit": 5000})
+        # Find all manually approved revisions
+        cursor.execute(manually_reviewed, {"page_id": 999397, "row_limit": 5})
         conn.commit()
-
         result = cursor.fetchall()
-        print(result)
+        for item in result:
+             print((item["rev_id"], True))
+
+        # Find all candidates for revisions which were not approved, but reverted
+        cursor.execute(potentially_reverted, {"page_id": 999397, "row_limit": 5})
+        conn.commit()
+        result = cursor.fetchall()
+        for item in result:
+             print((item["rev_id"], False))
 finally:
     conn.close()
     

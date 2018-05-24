@@ -7,7 +7,7 @@ FROM (
   SELECT
     fr_rev_id AS rev_id,
     fr_rev_timestamp AS rev_timestamp,
-    fr_page AS rev_page
+    fr_page_id AS rev_page
   FROM
     flaggedrevs
   WHERE
