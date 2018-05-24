@@ -1,0 +1,16 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>My first Flask OAuth tool</title>
+    </head>
+    <body>
+        {% if username %}
+        <p>Hello {{ username }}!</p>
+        <p><a href="{{ url_for('logout') }}">logout</a></p>
+        {% else %}
+        <p>{{ greeting }}</p>
+        <p><a href="{{ url_for('login') }}">login</a></p>
+        {% endif %}
+    </body>
+</html>
+
