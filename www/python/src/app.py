@@ -2,7 +2,7 @@ import flask
 import os
 import yaml
 import mwoauth
-import .api
+import api
 import requests
 
 app = flask.Flask(__name__)
