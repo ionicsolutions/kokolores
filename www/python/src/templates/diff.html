@@ -4,15 +4,16 @@
 {% endblock %}
 {% block jquery %}
 $.getJSON("https://de.wikipedia.org/w/api.php?action=compare",
-          {"fromrev": {{rev_parent}},
+          {"fromrev": {{parent_id}},
            "torev": {{rev_id}},
-           "format": "json"},
+           "format": "json",
+           "origin": "*"},
           function(result) {
-            $("#diff").html(result.compare.parse.text["*"]);
+            $("#diff").html(result.compare["*"]);
           });
 {% endblock %}
-{% block body %}
-<div class="col-md-6">
+{% block content %}
+<div class="col-ld-6">
   <table class="diff" id="diff">
 Loading...
   </table>
