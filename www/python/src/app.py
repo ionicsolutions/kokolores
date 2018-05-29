@@ -2,6 +2,8 @@ import flask
 import os
 import yaml
 import mwoauth
+import .api
+import requests
 
 app = flask.Flask(__name__)
 
@@ -13,6 +15,12 @@ def index():
     greeting = app.config["GREETING"]
     username = flask.session.get("username", None)
     return flask.render_template("index.html", username=username, greeting=greeting)
+
+@app.route("/inspect/<dataset>/<index>")
+def inspect(dataset, index):
+    diff = requests.get("")
+    return flask.render_template("diff.html", diff=)
+
 
 @app.route("/login")
 def login():
@@ -61,4 +69,8 @@ def oauth_callback():
 def logout():
     flask.session.clear()
     return flask.redirect(flask.url_for("index"))
+
+@app.route("/api/v1/parent/<revid>")
+def parent(revid):
+    return api.parent(revid)
 

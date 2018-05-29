@@ -23,8 +23,11 @@ def get_content_by_revids(revids, batch=50):
             for page_doc in doc['query']['pages']:
                 if 'revisions' in page_doc:
                     for revision_doc in page_doc['revisions']:
-                        #print(revision_doc)
-                        yield (revision_doc['sha1'], {"rev_id" : revision_doc['revid'], "user" : revision_doc["user"]})
+                        # print(revision_doc)
+                        yield (revision_doc['sha1'],
+                               {"rev_id" : revision_doc['revid'],
+                                "rev_parent": revision_doc['parentid'],
+                                "user" : revision_doc["user"]})
 
 
 def get_reverted_revisions(revids):
@@ -43,7 +46,9 @@ def get_all_reverted(revids, candidates):
                     self_revert = reverting["user"] == candidate["user"]
 
                     if not self_revert:
-                        dataset.append((candidate["rev_id"], False))
+                        dataset.append((candidate["rev_id"],
+                                        False,
+                                        candidate["parent_id"]))
                     else:
                         print("Self revert", candidate)
         else:

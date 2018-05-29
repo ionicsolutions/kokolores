@@ -1,6 +1,7 @@
 import toolforge
 import pymysql.cursors
 from reverts import get_all_reverted
+import json
 
 # Load SQL query for all manually approved revisions
 # based on https://quarry.wmflabs.org/query/27156
@@ -17,32 +18,48 @@ with open("queries/potentially_reverted.sql", "r") as queryfile:
 with open("queries/all_revisions.sql", "r") as queryfile:
     all_revisions = queryfile.read()
 
-conn = toolforge.connect("dewiki_p", cursorclass=pymysql.cursors.DictCursor)
+with open("queries/random_batch.sql", "r") as queryfile:
+    random_batch = queryfile.read()
 
-dataset = []
+conn = toolforge.connect("dewiki_p", cursorclass=pymysql.cursors.DictCursor)
 
 try:
     with conn.cursor() as cursor:
-        # Find all manually approved revisions
-        cursor.execute(manually_reviewed, {"page_id": 999397, "row_limit": 5000})
+        cursor.execute(random_batch, {"num": 100})
         conn.commit()
-        result = cursor.fetchall()
-        dataset.extend([(item["rev_id"], True) for item in result])
+        batch = [int(item["page_id"]) for item in cursor.fetchall()]
 
-        # Find all candidates for revisions which were not approved, but reverted
-        cursor.execute(potentially_reverted, {"page_id": 999397, "row_limit": 5000})
-        conn.commit()
-        result = cursor.fetchall()
-        candidates = [item["rev_id"] for item in result]
+    dataset = []
 
-        # Find all revisions
-        cursor.execute(all_revisions, {"page_id": 999397})
-        conn.commit()
-        result = cursor.fetchall()
-        all_revisions = [item["rev_id"] for item in result]
-        dataset.extend(get_all_reverted(all_revisions, candidates))
+    for page_id in batch:
+
+        with conn.cursor() as cursor:
+            # Find all manually approved revisions
+            cursor.execute(manually_reviewed, {"page_id": page_id,
+                                               "row_limit": 5000})
+            conn.commit()
+            result = cursor.fetchall()
+            dataset.extend([(item["rev_id"], True, item["rev_parent"])
+                            for item in result])
+
+            # Find all candidates for revisions which were not approved,
+            # but reverted
+            cursor.execute(potentially_reverted, {"page_id": page_id,
+                                                  "row_limit": 5000})
+            conn.commit()
+            result = cursor.fetchall()
+            candidates = [item["rev_id"] for item in result]
+
+            # Find all revisions
+            cursor.execute(all_revisions, {"page_id": page_id})
+            conn.commit()
+            result = cursor.fetchall()
+            all_revisions = [item["rev_id"] for item in result]
+            dataset.extend(get_all_reverted(all_revisions, candidates))
 
 finally:
     conn.close()
 
-print(dataset)
+print("Created dataset of length", len(dataset))
+with open("datasets/temp.js", "w") as datafile:
+    json.dump(dataset, datafile, indent=4)
