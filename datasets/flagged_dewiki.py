@@ -16,7 +16,7 @@ with open("queries/potentially_reverted.sql", "r") as queryfile:
 # Load SQL query for all revisions of a page
 # based on https://quarry.wmflabs.org/query/27173
 with open("queries/all_revisions.sql", "r") as queryfile:
-    all_revisions = queryfile.read()
+    fetch_all_revisions = queryfile.read()
 
 with open("queries/random_batch.sql", "r") as queryfile:
     random_batch = queryfile.read()
@@ -24,14 +24,16 @@ with open("queries/random_batch.sql", "r") as queryfile:
 conn = toolforge.connect("dewiki_p", cursorclass=pymysql.cursors.DictCursor)
 
 try:
+    print("Get batch...")
     with conn.cursor() as cursor:
         cursor.execute(random_batch, {"num": 100})
         conn.commit()
         batch = [int(item["page_id"]) for item in cursor.fetchall()]
-
+    print("Prepared batch of %d pages" % len(batch))
     dataset = []
 
     for page_id in batch:
+        print(page_id)
 
         with conn.cursor() as cursor:
             # Find all manually approved revisions
@@ -39,6 +41,7 @@ try:
                                                "row_limit": 5000})
             conn.commit()
             result = cursor.fetchall()
+            print("- %d flagged revisions" % len(result))
             dataset.extend([(item["rev_id"], True, item["rev_parent"])
                             for item in result])
 
@@ -50,12 +53,14 @@ try:
             result = cursor.fetchall()
             candidates = [item["rev_id"] for item in result]
 
-            # Find all revisions
-            cursor.execute(all_revisions, {"page_id": page_id})
+	    # Find all revisions
+            cursor.execute(fetch_all_revisions, {"page_id": page_id})
             conn.commit()
             result = cursor.fetchall()
             all_revisions = [item["rev_id"] for item in result]
-            dataset.extend(get_all_reverted(all_revisions, candidates))
+            reverted = get_all_reverted(all_revisions, candidates)
+            print("- %d reverted revisions" % len(reverted))
+            dataset.extend(reverted)
 
 finally:
     conn.close()

@@ -48,7 +48,7 @@ def get_all_reverted(revids, candidates):
                     if not self_revert:
                         dataset.append((candidate["rev_id"],
                                         False,
-                                        candidate["parent_id"]))
+                                        candidate["rev_parent"]))
                     else:
                         print("Self revert", candidate)
         else:
