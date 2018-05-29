@@ -1,38 +1,21 @@
-
+{% extends "layout.html" %}
+{% block head %}
 <link rel="stylesheet" type="text/css" href="https://de.wikipedia.org/w/load.php?debug=false&lang=de&modules=mediawiki.diff.styles&only=styles" />
-<table class="diff">
-<tr>
-  <td colspan="2" class="diff-lineno">Line 26:</td>
-  <td colspan="2" class="diff-lineno">Line 26:</td>
-</tr>
-<tr>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"></td>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"></td>
-</tr>
-<tr>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"><div>:'''Wikipedias in other languages'''</div></td>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"><div>:'''Wikipedias in other languages'''</div></td>
-</tr>
-<tr>
-  <td class="diff-marker">−</td>
-  <td class="diff-deletedline"><div>:[[Non-English Wikipedias|About the non-English Wikipedias]] - [http://af.wikipedia.com/ Afrikaans] - [http://ar.wikipedia.com/ Arabic (Araby)] - [http://eu.wikipedia.com/ Basque (Euskara)] - [http://ca.wikipedia.com/ Catalan (<del class="diffchange diffchange-inline">Català</del>)] - [http://zh.wikipedia.com/ Chinese (Hanyu)] - [http://dk.wikipedia.com/ Danish (Dansk)] - [http://nl.wikipedia.com/ Dutch (Nederlands)] - [http://eo.wikipedia.com/ Esperanto] - [http://fr.wikipedia.com/ French (<del class="diffchange diffchange-inline">Français</del>)] - [http://de.wikipedia.com/ German (Deutsch)] - [http://he.wikipedia.com/ Hebrew (Ivrit)] - [http://hu.wikipedia.com/ Hungarian (Magyar)] - [http://it.wikipedia.com/ Italian (Italiano)]  - [http://ja.wikipedia.com/ Japanese (Nihongo)] - [http://no.wikipedia.com/ Norwegian (Norsk)] - [http://pl.wikipedia.com/ Polish (Polska)] - [http://pt.wikipedia.com/ Portuguese (<del class="diffchange diffchange-inline">Português</del>)] - [http://ru.wikipedia.com/ Russian (Russkiy)] - [http://sh.wikipedia.com/ Serbocroatian (Croatoserbian)] - [http://es.wikipedia.com/ Spanish (Castellano)] - [http://sv.wikipedia.com/ Swedish (Svensk)] </div></td>
-  <td class="diff-marker">+</td>
-  <td class="diff-addedline"><div>:[[Non-English Wikipedias|About the non-English Wikipedias]] - [http://af.wikipedia.com/ Afrikaans] - [http://ar.wikipedia.com/ Arabic (Araby)] - [http://eu.wikipedia.com/ Basque (Euskara)] - [http://ca.wikipedia.com/ Catalan (<ins class="diffchange diffchange-inline">Catal&amp;agrave;</ins>)] - [http://zh.wikipedia.com/ Chinese (Hanyu)] - [http://dk.wikipedia.com/ Danish (Dansk)] - [http://nl.wikipedia.com/ Dutch (Nederlands)] - [http://eo.wikipedia.com/ Esperanto] - [http://fr.wikipedia.com/ French (<ins class="diffchange diffchange-inline">Fran&amp;ccedil;ais</ins>)] - [http://de.wikipedia.com/ German (Deutsch)] - [http://he.wikipedia.com/ Hebrew (Ivrit)] - [http://hu.wikipedia.com/ Hungarian (Magyar)] - [http://it.wikipedia.com/ Italian (Italiano)]  - [http://ja.wikipedia.com/ Japanese (Nihongo)] - [http://no.wikipedia.com/ Norwegian (Norsk)] - [http://pl.wikipedia.com/ Polish (Polska)] - [http://pt.wikipedia.com/ Portuguese (<ins class="diffchange diffchange-inline">Portug&amp;ecirc;s</ins>)] - [http://ru.wikipedia.com/ Russian (Russkiy)] - [http://sh.wikipedia.com/ Serbocroatian (Croatoserbian)] - [http://es.wikipedia.com/ Spanish (Castellano)] - [http://sv.wikipedia.com/ Swedish (Svensk)] </div></td>
-</tr>
-<tr>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"><div>----</div></td>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"><div>----</div></td>
-</tr>
-<tr>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"><div>:'''Wikipedia'''</div></td>
-  <td class="diff-marker">&#160;</td>
-  <td class="diff-context"><div>:'''Wikipedia'''</div></td>
-</tr>
-</table>
+{% endblock %}
+{% block jquery %}
+$.getJSON("https://de.wikipedia.org/w/api.php?action=compare",
+          {"fromrev": {{rev_parent}},
+           "torev": {{rev_id}},
+           "format": "json"},
+          function(result) {
+            $("#diff").html(result.compare.parse.text["*"]);
+          });
+{% endblock %}
+{% block body %}
+<div class="col-md-6">
+  <table class="diff" id="diff">
+Loading...
+  </table>
+  </div>
+{% endblock %}
+

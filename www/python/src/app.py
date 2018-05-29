@@ -18,9 +18,7 @@ def index():
 
 @app.route("/inspect/<dataset>/<index>")
 def inspect(dataset, index):
-    diff = requests.get("")
-    return flask.render_template("diff.html", diff=)
-
+    return flask.render_template("diff.html", rev_id=139993, parent_id=139992)
 
 @app.route("/login")
 def login():
