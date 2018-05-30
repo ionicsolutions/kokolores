@@ -62,8 +62,9 @@ for rev_id, approved, _ in training_set:
 
 print("Dump observations to file")
 from revscoring.utilities.util import dump_observation, read_observations
-import bz2
 
 with open("observations.json.bz2", "wt") as dumpfile:
     for observation in training_features:
         dump_observation(observation, dumpfile)
+
+

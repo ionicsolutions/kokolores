@@ -1,8 +1,11 @@
 {% extends "layout.html" %}
+{% block title %}Dataset Inspector{% endblock %}
 {% block head %}
 <link rel="stylesheet" type="text/css" href="https://de.wikipedia.org/w/load.php?debug=false&lang=de&modules=mediawiki.diff.styles&only=styles" />
 {% endblock %}
 {% block jquery %}
+$("#info-status").text({{label}});
+
 $.getJSON("https://de.wikipedia.org/w/api.php?action=compare",
           {"fromrev": {{parent_id}},
            "torev": {{rev_id}},
@@ -10,13 +13,35 @@ $.getJSON("https://de.wikipedia.org/w/api.php?action=compare",
            "origin": "*"},
           function(result) {
             $("#diff").html(result.compare["*"]);
+            $("<a/>").attr("href", "https://de.wikipedia.org/wiki/result.compare.fromtitle">").text(result.compare.fromtitle).appendTo($("#info-page"));
+
           });
 {% endblock %}
 {% block content %}
-<div class="col-ld-6">
+<div class="col-ld-2">
+    <h4>Diff Info</h4>
+    <table class="table">
+        <tr>
+            <td>Approved:</td>
+            <td><strong id="info-status">Loading...</strong></td>
+        </tr>
+        <tr>
+            <td>Page:</td>
+            <td id="info-page">Loading...</td>
+        </tr>
+        <tr>
+            <td>Parent:</td>
+            <td><a href="https://de.wikipedia.org/wiki/index.php?oldid={{parent_id}}">{{parent_id}}</a></td>
+        </tr>
+        <tr>
+            <td>Revision:</td>
+            <td><a href="https://de.wikipedia.org/wiki/index.php?oldid={{rev_id}}">{{rev_id}}</a></td>
+        </tr>
+    </table>
+</div>
+<div class="col-ld-4">
   <table class="diff" id="diff">
 Loading...
   </table>
   </div>
 {% endblock %}
-

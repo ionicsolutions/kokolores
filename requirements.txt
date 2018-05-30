@@ -2,3 +2,5 @@ toolforge
 pymysql
 mwreverts
 mwapi
+revscoring
+sseclient

@@ -4,11 +4,15 @@ import yaml
 import mwoauth
 import api
 import requests
+import json
 
 app = flask.Flask(__name__)
 
 __dir__ = os.path.dirname(__file__)
 app.config.update(yaml.safe_load(open(os.path.join(__dir__, 'config.yaml'))))
+
+with open("test.json", "r") as testset:
+    testdata = json.load(testset)
 
 @app.route("/")
 def index():
@@ -16,9 +20,11 @@ def index():
     username = flask.session.get("username", None)
     return flask.render_template("index.html", username=username, greeting=greeting)
 
-@app.route("/inspect/<dataset>/<index>")
+@app.route("/inspect/<str:dataset>/<int:index>")
 def inspect(dataset, index):
-    return flask.render_template("diff.html", rev_id=139993, parent_id=139992)
+    rev_id, label, parent_id = testdata[index]
+    return flask.render_template("diff.html", label=label, index=index,
+                                 rev_id=rev_id, parent_id=parent_id)
 
 @app.route("/login")
 def login():
