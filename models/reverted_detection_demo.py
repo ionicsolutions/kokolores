@@ -96,5 +96,3 @@ for rev_id in reverted[:10]:
     score = is_approved.score(feature_values)
     print(False, "https://en.wikipedia.org/wiki/?diff=" + str(rev_id),
           score['prediction'], round(score['probability'][True], 2))
-
-    

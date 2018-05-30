@@ -55,10 +55,6 @@ class RevertDetector:
                             dataset.append((candidate["rev_id"],
                                             False,
                                             candidate["rev_parent"]))
-                        else:
-                            print("Self revert", candidate)
-            else:
-                print("Missing reverted")
 
         return [item for item in dataset if item[0] not in revert_destination]
 
