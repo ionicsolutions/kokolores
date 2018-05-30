@@ -67,4 +67,34 @@ with open("observations.json.bz2", "wt") as dumpfile:
     for observation in training_features:
         dump_observation(observation, dumpfile)
 
+with open("observations.json.bz2", "wt") as dumpfile:
+    training_features = list(read_observations(dumpfile))
 
+from revscoring.scoring.models import GradientBoosting
+is_approved = GradientBoosting(features, labels=[True, False],
+                               version="Demo",
+                               learning_rate=0.01,
+                               max_features="log2",
+                               n_estimators=700, max_depth=5,
+                               population_rates={False: 0.5, True: 0.5},
+                               scale=True, center=True)
+
+training_unpacked = [(o["cache"], o["approved"]) for o in training_features]
+is_approved.train(training_unpacked)
+
+approved = [rev_id for rev_id, approved, _ in testing_set if approved]
+reverted = [rev_id for rev_id, approved, _ in testing_set if not approved]
+
+for rev_id in approved[:10]:
+    feature_values = list(api_extractor.extract(rev_id, features))
+    score = is_approved.score(feature_values)
+    print(True, "https://en.wikipedia.org/wiki/?diff=" + str(rev_id),
+          score['prediction'], round(score['probability'][True], 2))
+
+for rev_id in reverted[:10]:
+    feature_values = list(api_extractor.extract(rev_id, features))
+    score = is_approved.score(feature_values)
+    print(False, "https://en.wikipedia.org/wiki/?diff=" + str(rev_id),
+          score['prediction'], round(score['probability'][True], 2))
+
+    
