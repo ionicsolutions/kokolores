@@ -11,7 +11,7 @@ FROM (
   FROM
     flaggedrevs
   WHERE
-    fr_flags NOT LIKE '%auto%'
+    fr_flags NOT LIKE '%%auto%%'
     AND fr_page_id=%(page_id)s
 ) AS manually_reviewed,
 (
