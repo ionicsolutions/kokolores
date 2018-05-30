@@ -67,7 +67,7 @@ with open("observations.json.bz2", "wt") as dumpfile:
     for observation in training_features:
         dump_observation(observation, dumpfile)
 
-with open("observations.json.bz2", "wt") as dumpfile:
+with open("observations.json.bz2", "r") as dumpfile:
     training_features = list(read_observations(dumpfile))
 
 from revscoring.scoring.models import GradientBoosting

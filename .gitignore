@@ -1,11 +1,11 @@
 *.yaml
 *.manifest
 *.log
-*.json.bz2
+models/*.json.bz2
 *__pycache__/
 
-# hide datasets
-datasets/datasets/
+# hide temporary datasets
+datasets/*.json.bz2
 
 # Toolforge specifics
 dicts/
