@@ -157,6 +157,9 @@ class Creator:
             result = cursor.fetchall()
             candidates = [item["rev_id"] for item in result]
 
+            if not candidates:
+                return []
+
             # Retrieve all revisions of the page for revert detection
             cursor.execute(FETCH_ALL_REVISIONS, {"page_id": page_id,
                                                  "from_rev": min(candidates)})
