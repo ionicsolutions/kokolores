@@ -21,7 +21,7 @@ FROM (
     flaggedrevs
   WHERE
     fr_page_id=%(page_id)s
-) AS auto_reviewed
+) AS all_reviewed
 WHERE
     rev_id > stable_rev_id
     AND rev_timestamp > 20080507000000 -- FlaggedRevs was enabled on May 6th 2008
