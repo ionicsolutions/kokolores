@@ -1,4 +1,3 @@
-import logging
 from creator import Creator
 
 c = Creator("dewiki")
