@@ -1,11 +1,21 @@
 *.yaml
 *.manifest
 *.log
+*.json.bz2
+*__pycache__/
+
+# hide datasets
+datasets/datasets/
 
 # Toolforge specifics
+dicts/
+nltk_data/
 .bash_history
 env/
 .kube/
 .cache/
+.subversion/
 replica.my.cnf
 www/python/venv/
+.aptitude/
+.config/
