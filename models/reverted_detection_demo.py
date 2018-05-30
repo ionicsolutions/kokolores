@@ -5,6 +5,10 @@ import json
 import sys
 import mwapi
 
+import enchant
+enchant.set_param("enchant.myspell.dictionary.path", r"/data/project/kokolores/dicts/usr/share/myspell/dicts/")
+d = enchant.Dict("de-DE")
+
 print("Load dataset...")
 with open("../datasets/datasets/temp.js", "r") as datafile:
     dataset = json.load(datafile)
@@ -48,16 +52,16 @@ print("Extracting training features")
 training_features = []
 for rev_id, approved, _ in training_set:
     try:
-        feature_values = list(api_extractor.extract(rev_id, approved))
+        feature_values = list(api_extractor.extract(rev_id, features))
         observation = {"rev_id": rev_id, "cache": feature_values, "approved": approved}
     except RuntimeError as e:
         sys.stderr.write(str(e))
     else:
-        sys.stderr.write(".")
+        print(observation)
         training_features.append(observation)
 
 print("Dump observations to file")
-from revscoring.utilities.util import dump_observation, read_observation
+from revscoring.utilities.util import dump_observation, read_observations
 import bz2
 
 with open("observations.json.bz2", "wt") as dumpfile:

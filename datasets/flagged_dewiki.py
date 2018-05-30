@@ -26,7 +26,7 @@ conn = toolforge.connect("dewiki_p", cursorclass=pymysql.cursors.DictCursor)
 try:
     print("Get batch...")
     with conn.cursor() as cursor:
-        cursor.execute(random_batch, {"num": 100})
+        cursor.execute(random_batch, {"num": 1000})
         conn.commit()
         batch = [int(item["page_id"]) for item in cursor.fetchall()]
     print("Prepared batch of %d pages" % len(batch))
