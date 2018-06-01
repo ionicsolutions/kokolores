@@ -19,12 +19,14 @@
 ## Types of approvals and rejections
 
 ### Approvals
-Most revisions are autoreviewed because the editor is a member of the group *autoconfirmed*.
+Most revisions are autoreviewed (`fr_flag LIKE '%auto%`) because the editor is a member of
+the group *autoreview* (called "Passiver Sichter" on dewiki).
 These are of no interest here, as they are A) covered by ORES `editquality` models and B) do not
 contribute to the backlog which we are trying to decrease (and C) are much more diverse than
 the typical revisions we are looking at here).
 
-There are single revisions which are approved individually, but there are also chains of revisions
+There are single revisions which are approved individually (`fr_flag NOT LIKE '%auto%'`), but there are also
+chains of revisions
 by the same editor of which only the final revision is approved (which contains the whole set of changes).
 Here, we need to look at all the changes since the last approved revision, rather than at the difference between
 the marked revision and the one immediately preceding it. Note that this hides partial and complete reverts made
@@ -50,8 +52,10 @@ often this happens and whether these controversial cases should be reviewed base
 **INVESTIGATE**
 
 ### Unapprovals
-There are also revisions which are approved and later this decision is reversed. It might prove necessary to filter
-for these cases in the training/testing data set, but they should be few and far between. **INVESTIGATE**
+There are also revisions which are approved and later this decision is reversed.
+These revisions are not present in the `flaggedrevs` table. This can be verified
+by removing the approval from an old revision, query the database, approving
+the revision again and looking at the database once again.
 
 ## Features specific to FlaggedRevisions
 

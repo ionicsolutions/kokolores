@@ -7,8 +7,8 @@ Description of all `kokolores` benchmark data sets.
 ### Summary
 
 - 10 000 revisions
-  - approved: 4 954 (49.54%)
-  - rejected: 5 046 (50.46%)
+  - approved: 7 236 (72.36%)
+  - rejected: 2 764 (27.64%)
 
 ### Creation
 
