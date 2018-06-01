@@ -13,6 +13,7 @@ FROM (
   WHERE
     fr_flags NOT LIKE '%%auto%%'
     AND fr_page_id=%(page_id)s
+    AND fr_rev_timestamp BETWEEN %(start)s AND %(stop)s
 ) AS manually_reviewed,
 (
   SELECT
@@ -24,6 +25,4 @@ FROM (
 ) AS all_reviewed
 WHERE
     rev_id > stable_rev_id
-    AND rev_timestamp > 20080507000000 -- FlaggedRevs was enabled on May 6th 2008
-GROUP BY rev_id
-LIMIT %(row_limit)s;
+GROUP BY rev_id;

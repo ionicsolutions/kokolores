@@ -9,5 +9,5 @@ FROM
 WHERE
 	rev_page=%(page_id)s
 	AND rev_id > %(from_rev)s
-    AND rev_timestamp > 20080507000000 -- FlaggedRevs was enabled on May 6th 2008
+    AND rev_timestamp BETWEEN %(start)s AND %(stop)s
 ORDER BY rev_timestamp ASC;

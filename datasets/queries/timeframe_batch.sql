@@ -1,5 +1,5 @@
 SELECT DISTINCT
-    fr_page_id
+    fr_page_id AS page_id
 FROM
     flaggedrevs
 INNER JOIN page ON flaggedrevs.fr_page_id = page.page_id

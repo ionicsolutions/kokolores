@@ -24,5 +24,4 @@ LEFT JOIN (
 ) AS flagged_revisions ON all_revisions.rev_id = flagged_revisions.fr_rev_id
 WHERE
 	flagged_revisions.fr_rev_id IS NULL
-    AND all_revisions.rev_timestamp > 20080507000000 -- FlaggedRevs was enabled on May 6th 2008
-LIMIT %(row_limit)s;
+    AND rev_timestamp BETWEEN %(start)s AND %(stop)s;
