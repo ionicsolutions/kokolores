@@ -7,11 +7,11 @@ from itertools import islice
 class RevertDetector:
 
     def __init__(self, db):
-        my_agent = "kokolores dataset creator "\
+        my_agent = "kokolores dataset creator " \
                    "<kokolores.datasets@tools.wmflabs.org>"
         self.session = mwapi.Session("https://%s.wikipedia.org" % db[:2],
-                                formatversion=2,
-                                user_agent=my_agent)
+                                     formatversion=2,
+                                     user_agent=my_agent)
 
     # based on https://github.com/mediawiki-utilities/python-mwapi/blob/master/demo_queries.py
     def get_content_by_revids(self, revids, batch=50):
@@ -22,39 +22,68 @@ class RevertDetector:
                 break
             else:
                 doc = self.session.post(action='query', prop='revisions',
-                                   revids=batch_ids, rvprop='ids|sha1|user')
+                                        revids=batch_ids, rvprop='ids|sha1|user')
 
                 for page_doc in doc['query']['pages']:
                     if 'revisions' in page_doc:
                         for revision_doc in page_doc['revisions']:
                             try:
                                 yield (revision_doc['sha1'],
-                                       {"rev_id" : revision_doc['revid'],
-                                        "rev_parent": revision_doc['parentid'],
-                                        "user" : revision_doc["user"]})
+                                       {"rev_id": revision_doc['revid'],
+                                        "user": revision_doc["user"]})
                             except KeyError:
                                 continue
 
-    # based on https://github.com/wiki-ai/editquality/blob/master/ipython/reverted_detection_demo.ipynb
-    def get_all(self, revids, candidates):
-        revisions = list(self.get_content_by_revids(revids))
+    def get_all(self, all_revisions, candidates, all_approved):
+        """Find all reverts of unapproved revisions back to the latest approved
+        revision.
+
+        Based on the example given in https://github.com/wiki-ai/editquality/blob/master/ipython/reverted_detection_demo.ipynb
+        but adapted significantly to the problem context.
+
+        :param all_revisions: List of all revision IDs.
+        :param candidates: List of all unapproved revision IDs.
+        :param all_approved: List of all approved revision IDs.
+        :return:
+        """
+        revisions = list(self.get_content_by_revids(all_revisions))
 
         dataset = []
         revert_destination = []
         for reverting, reverteds, reverted_to in mwreverts.detect(revisions,
                                                                   radius=5):
-            if reverted_to is not None:
-                revert_destination.append(reverted_to)
+            # ignore reverts with unknown target
+            if reverted_to is None:
+                continue
+            else:
+                revert_destination.append(reverted_to["rev_id"])
+
+            # ignore reverts which were not approved
+            if reverting["rev_id"] not in all_approved:
+                continue
+
+            # ignore reverts whose target is not approved
+            if reverted_to["rev_id"] not in all_approved:
+                continue
 
             if reverteds is not None:
-                for candidate in reverteds:
-                    if candidate["rev_id"] in candidates:
-                        self_revert = reverting["user"] == candidate["user"]
+                # the revision we are interested in is the latest unapproved
+                # revision prior to the revert, i.e. what the reverting user
+                # saw when making their decision
+                candidate = max(reverteds, key=lambda item: item["rev_id"])
 
-                        if not self_revert:
-                            dataset.append((candidate["rev_id"],
-                                            False,
-                                            candidate["rev_parent"]))
+                # filter out reverts whose target is not the latest approved
+                # revision (that's beyond the scope of kokolores)
+                latest_approved = max([rev["rev_id"] for rev in all_approved
+                                       if rev["rev_id"] < candidate["rev_id"]])
+
+                if (latest_approved == reverted_to["rev_id"] and
+                        candidate["rev_id"] in candidates):
+                    self_revert = reverting["user"] == reverted_to["user"]
+                    if not self_revert:
+                        dataset.append((candidate["rev_id"],
+                                        False,
+                                        reverted_to["rev_id"]))
 
         return [item for item in dataset if item[0] not in revert_destination]
 
