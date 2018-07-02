@@ -2,8 +2,7 @@ import flask
 import os
 import yaml
 import mwoauth
-import api
-import requests
+from .api import most_recent_approved
 import json
 
 app = flask.Flask(__name__)
@@ -11,8 +10,6 @@ app = flask.Flask(__name__)
 __dir__ = os.path.dirname(__file__)
 app.config.update(yaml.safe_load(open(os.path.join(__dir__, 'config.yaml'))))
 
-with open("test.json", "r") as testset:
-    testdata = json.load(testset)
 
 @app.route("/")
 def index():
@@ -20,11 +17,13 @@ def index():
     username = flask.session.get("username", None)
     return flask.render_template("index.html", username=username, greeting=greeting)
 
+
 @app.route("/inspect/<str:dataset>/<int:index>")
 def inspect(dataset, index):
     rev_id, label, parent_id = testdata[index]
     return flask.render_template("diff.html", label=label, index=index,
                                  rev_id=rev_id, parent_id=parent_id)
+
 
 @app.route("/login")
 def login():
@@ -40,10 +39,11 @@ def login():
         flask.session["request_token"] = dict(zip(request_token._fields, request_token))
         return flask.redirect(redirect)
 
+
 @app.route("/oauth-callback")
 def oauth_callback():
     if "request_token" not in flask.session:
-        flask.flash(u"OAuth callbak failed. Are cookies disabled?")
+        flask.flash(u"OAuth callback failed. Are cookies disabled?")
         return flask.redirect(flask.url_for("index"))
 
     consumer_token = mwoauth.ConsumerToken(
@@ -59,7 +59,7 @@ def oauth_callback():
         identity = mwoauth.identify(
             app.config["OAUTH_MWURI"], consumer_token, access_token)
     except Exception:
-        app.logger.exception("OAuth authentification failed")
+        app.logger.exception("OAuth authentication failed")
 
     else:
         flask.session["access_token"] = dict(zip(
@@ -74,7 +74,7 @@ def logout():
     flask.session.clear()
     return flask.redirect(flask.url_for("index"))
 
-@app.route("/api/v1/parent/<revid>")
-def parent(revid):
-    return api.parent(revid)
 
+@app.route("/api/v1/parent/<rev_id>/<page_id>")
+def parent(rev_id, page_id):
+    return flask.jsonify({"parentid": most_recent_approved(rev_id, page_id)})
