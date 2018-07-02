@@ -33,7 +33,7 @@ def flagged_parent(rev_id, page_id):
     return jsonify(most_recent_approved(rev_id, page_id))
 
 
-@flagged_api.route("/api/v1/parent", methods="POST")
+@flagged_api.route("/api/v1/parent", methods=["POST"])
 def flagged_parents():
     try:
         rev_ids = request.get_json()["revids"]
@@ -56,7 +56,7 @@ def most_recent_approved(rev_id, page_id=None):
                            {"page_id": page_id,
                             "rev_id": rev_id})
             conn.commit()
-            parent_id = int(cursor.fetchone())
+            parent_id = int(cursor.fetchone()[0])
     except Exception as e:
         return {"ERROR": str(e)}
     else:

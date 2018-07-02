@@ -2,7 +2,7 @@ import flask
 import os
 import yaml
 import mwoauth
-from .api import flagged_api
+from api import flagged_api
 import json
 
 app = flask.Flask(__name__)
@@ -19,7 +19,7 @@ def index():
     return flask.render_template("index.html", username=username, greeting=greeting)
 
 
-@app.route("/inspect/<str:dataset>/<int:index>")
+@app.route("/inspect/<string:dataset>/<int:index>")
 def inspect(dataset, index):
     rev_id, label, parent_id = testdata[index]
     return flask.render_template("diff.html", label=label, index=index,
