@@ -2,10 +2,11 @@ import flask
 import os
 import yaml
 import mwoauth
-from .api import most_recent_approved
+from .api import flagged_api
 import json
 
 app = flask.Flask(__name__)
+app.register_blueprint(flagged_api)
 
 __dir__ = os.path.dirname(__file__)
 app.config.update(yaml.safe_load(open(os.path.join(__dir__, 'config.yaml'))))
@@ -73,8 +74,3 @@ def oauth_callback():
 def logout():
     flask.session.clear()
     return flask.redirect(flask.url_for("index"))
-
-
-@app.route("/api/v1/parent/<rev_id>/<page_id>")
-def parent(rev_id, page_id):
-    return flask.jsonify({"parentid": most_recent_approved(rev_id, page_id)})
