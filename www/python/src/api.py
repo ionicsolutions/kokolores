@@ -9,47 +9,62 @@ import mwapi
 import toolforge
 from flask import Blueprint, jsonify, request
 
-__dir__ = os.path.dirname(__file__)
+flagged_api = Blueprint('api', __name__)
 
-flagged_api = Blueprint('api', __name__,
-                        template_folder='templates')
+SUPPORTED_WIKIS = ["de"]
 
 USER_AGENT = "kokolores API <kokolores.api@wmflabs.org"
-session = mwapi.Session("https://de.wikipedia.org",
-                        user_agent=USER_AGENT)
+sessions = {}
 
+__dir__ = os.path.dirname(__file__)
 with open(os.path.join(__dir__, "queries/flagged_parent.sql"),
           "rt") as queryfile:
     FLAGGED_PARENT = queryfile.read()
 
 
-def _get_connection():
-    return toolforge.connect("dewiki_p")
+def _get_session(wiki):
+    if wiki not in sessions:
+        sessions[wiki] = mwapi.Session(
+            "https://{:s}.wikipedia.org".format(wiki),
+            user_agent=USER_AGENT)
+    return sessions[wiki]
 
 
-@flagged_api.route("/api/v1/parent/<int:rev_id>/", defaults={"page_id": None})
-@flagged_api.route("/api/v1/parent/<int:rev_id>/<int:page_id>")
-def flagged_parent(rev_id, page_id):
-    return jsonify(most_recent_approved(rev_id, page_id))
+def _get_connection(wiki):
+    return toolforge.connect("{:s}wiki_p".format(wiki))
 
 
-@flagged_api.route("/api/v1/parent", methods=["POST"])
-def flagged_parents():
+@flagged_api.route("/api/v1/<string:wiki>/parent/<int:rev_id>/",
+                   defaults={"page_id": None})
+@flagged_api.route("/api/v1/<string:wiki>/parent/<int:rev_id>/<int:page_id>")
+def flagged_parent(wiki, rev_id, page_id):
+    if wiki not in SUPPORTED_WIKIS:
+        return jsonify({"ERROR": "Only %s are supported." % SUPPORTED_WIKIS})
+
+    return jsonify(most_recent_approved(wiki, rev_id, page_id))
+
+
+@flagged_api.route("/api/v1/<string:wiki>/parent/", methods=["POST"])
+def flagged_parents(wiki):
+    if wiki not in SUPPORTED_WIKIS:
+        return jsonify({"ERROR": "Only %s are supported." % SUPPORTED_WIKIS})
+
     try:
         rev_ids = request.get_json()["revids"]
     except KeyError:
         return jsonify({"ERROR": "Need to provide a list of revids."})
     else:
-        return jsonify(most_recent_approved_many(rev_ids))
+        return jsonify(most_recent_approved_many(wiki, rev_ids))
 
 
-def most_recent_approved(rev_id, page_id=None):
+def most_recent_approved(wiki, rev_id, page_id=None):
     if page_id is None:
+        session = _get_session(wiki)
         doc = session.post(action="query",
                            revids=[rev_id])
         page_id = int(next(iter(doc["query"]["pages"])))
 
-    conn = _get_connection()
+    conn = _get_connection(wiki)
     try:
         with conn.cursor() as cursor:
             cursor.execute(FLAGGED_PARENT,
@@ -67,8 +82,9 @@ def most_recent_approved(rev_id, page_id=None):
         conn.close()
 
 
-def most_recent_approved_many(rev_ids):
+def most_recent_approved_many(wiki, rev_ids):
     flagged_parents = {}
+    session = _get_session(wiki)
     doc = session.post(action="query",
                        prop=["revisions", "flagged"],
                        revids=rev_ids)
