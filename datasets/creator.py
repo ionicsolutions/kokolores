@@ -38,17 +38,17 @@ def load_query(fname):
 # Load SQL query for all manually approved revisions
 # based on https://quarry.wmflabs.org/query/27156
 MANUALLY_REVIEWED = load_query("queries/manually_reviewed.sql")
-MANUALLY_REVIEWED_TIMEFRAME = load_query("queries/manually_reviewed_timeframe.sql")
+#MANUALLY_REVIEWED_TIMEFRAME = load_query("queries/manually_reviewed_timeframe.sql")
 
 # Load SQL query for potentially reverted revisions
 # based on https://quarry.wmflabs.org/query/27161
 POTENTIALLY_REVERTED = load_query("queries/potentially_reverted.sql")
-POTENTIALLY_REVERTED_TIMEFRAME = load_query("queries/potentially_reverted_timeframe.sql")
+#POTENTIALLY_REVERTED_TIMEFRAME = load_query("queries/potentially_reverted_timeframe.sql")
 
 # Load SQL query for all revisions of a page
 # based on https://quarry.wmflabs.org/query/27173
 FETCH_ALL_REVISIONS = load_query("queries/all_revisions.sql")
-FETCH_ALL_REVISIONS_TIMEFRAME = load_query("queries/all_revisions_timeframe.sql")
+#FETCH_ALL_REVISIONS_TIMEFRAME = load_query("queries/all_revisions_timeframe.sql")
 
 # Load SQL query for a randomized batch of pages with flagged revision data
 RANDOM_BATCH = load_query("queries/random_batch.sql")
@@ -119,7 +119,7 @@ class Creator:
         else:
             self.stop = stop
 
-        if start > stop:
+        if self.start > self.stop:
             raise ValueError("Start (%d) has to come before stop (%d)"
                              % (self.start, self.stop))
 

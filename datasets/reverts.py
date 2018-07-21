@@ -54,16 +54,20 @@ class RevertDetector:
                                                                   radius=5):
             # ignore reverts with unknown target
             if reverted_to is None:
+                print("No target for %d" % reverting["rev_id"])
                 continue
             else:
                 revert_destination.append(reverted_to["rev_id"])
 
             # ignore reverts which were not approved
             if reverting["rev_id"] not in all_approved:
+                print("Revert %d was not approved." % reverting["rev_id"])
                 continue
 
             # ignore reverts whose target is not approved
             if reverted_to["rev_id"] not in all_approved:
+                print("Revert %d has unnaproved targed %d"
+                      % (reverting["rev_id"], reverted_to["rev_id"]))
                 continue
 
             if reverteds is not None:
@@ -71,19 +75,28 @@ class RevertDetector:
                 # revision prior to the revert, i.e. what the reverting user
                 # saw when making their decision
                 candidate = max(reverteds, key=lambda item: item["rev_id"])
+                print("Candidate %s out of %s" % (candidate, reverteds))
 
                 # filter out reverts whose target is not the latest approved
                 # revision (that's beyond the scope of kokolores)
-                latest_approved = max([rev["rev_id"] for rev in all_approved
-                                       if rev["rev_id"] < candidate["rev_id"]])
+                latest_approved = max([rev_id for rev_id in all_approved
+                                       if rev_id < candidate["rev_id"]])
+                print("Latest approved revision is %d" % latest_approved)
 
-                if (latest_approved == reverted_to["rev_id"] and
-                        candidate["rev_id"] in candidates):
-                    self_revert = reverting["user"] == reverted_to["user"]
-                    if not self_revert:
-                        dataset.append((candidate["rev_id"],
-                                        False,
-                                        reverted_to["rev_id"]))
+                if (latest_approved == reverted_to["rev_id"]):
+                    if candidate["rev_id"] in candidates:
+                        self_revert = candidate["user"] == reverted_to["user"]
+                        if not self_revert:
+                            dataset.append((candidate["rev_id"],
+                                            False,
+                                            reverted_to["rev_id"]))
+                        else:
+                            print("Self revert!")
+                    else:
+                        print("Candidate is in flaggedrevs table")
+                else:
+                    print("Target is not latest")
+
 
         return [item for item in dataset if item[0] not in revert_destination]
 

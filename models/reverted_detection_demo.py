@@ -4,13 +4,14 @@
 import json
 import sys
 import mwapi
+import bz2
 
 import enchant
 enchant.set_param("enchant.myspell.dictionary.path", r"/data/project/kokolores/dicts/usr/share/myspell/dicts/")
 d = enchant.Dict("de-DE")
 
 print("Load dataset...")
-with open("../datasets/datasets/temp.js", "r") as datafile:
+with bz2.open("../datasets/datasets/dewiki_10000.json.bz2", "rt") as datafile:
     dataset = json.load(datafile)
 
 length = len(dataset)

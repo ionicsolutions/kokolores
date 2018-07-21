@@ -31,3 +31,23 @@ def inspect(fname):
     print("Approved:", positive)
     print("Rejected:", negative)
     print("Total:", negative + positive, "=", len(dataset))
+
+def show(fname):
+    dataset = utils.load_bz2json(fname)
+    i = 0
+    for item in dataset:
+        if item[1]:
+            print(item)
+            print("https://de.wikipedia.org/wiki/Spezial:Diff/%d" % item[0])
+            i += 1
+        if i > 10:
+            break
+
+    i = 0
+    for item in dataset:
+        if not item[1]:
+            print(item)
+            print("https://de.wikipedia.org/wiki/Spezial:Diff/%d" % item[0])
+            i += 1
+        if i > 10:
+            break
