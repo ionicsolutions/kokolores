@@ -3,12 +3,12 @@ import os
 import yaml
 import mwoauth
 from api import flagged_api
-from inspector import inspector
+# from inspector import inspector
 import json
 
 app = flask.Flask(__name__)
 app.register_blueprint(flagged_api)
-app.register_blueprint(inspector)
+# app.register_blueprint(inspector)
 
 __dir__ = os.path.dirname(__file__)
 app.config.update(yaml.safe_load(open(os.path.join(__dir__, 'config.yaml'))))
