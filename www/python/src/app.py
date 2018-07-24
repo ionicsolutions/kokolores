@@ -3,10 +3,12 @@ import os
 import yaml
 import mwoauth
 from api import flagged_api
+from inspector import inspector
 import json
 
 app = flask.Flask(__name__)
 app.register_blueprint(flagged_api)
+app.register_blueprint(inspector)
 
 __dir__ = os.path.dirname(__file__)
 app.config.update(yaml.safe_load(open(os.path.join(__dir__, 'config.yaml'))))
@@ -17,13 +19,6 @@ def index():
     greeting = app.config["GREETING"]
     username = flask.session.get("username", None)
     return flask.render_template("index.html", username=username, greeting=greeting)
-
-
-@app.route("/inspect/<string:dataset>/<int:index>")
-def inspect(dataset, index):
-    rev_id, label, parent_id = testdata[index]
-    return flask.render_template("diff.html", label=label, index=index,
-                                 rev_id=rev_id, parent_id=parent_id)
 
 
 @app.route("/login")

@@ -1,6 +1,6 @@
 """FlaggedRevs API
 
-This API provides functionality which is not available through the
+This API provides functionality which is currently not available through the
 MediaWiki API.
 """
 import os
