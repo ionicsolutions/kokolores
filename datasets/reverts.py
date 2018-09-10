@@ -1,17 +1,21 @@
 import mwapi
 import mwreverts
+import logging
 
 from itertools import islice
+logging.basicConfig(level=logging.DEBUG)
 
 
 class RevertDetector:
 
     def __init__(self, db):
+        self.logger = logging.getLogger("kokolores.reverts")
         my_agent = "kokolores dataset creator " \
                    "<kokolores.datasets@tools.wmflabs.org>"
         self.session = mwapi.Session("https://%s.wikipedia.org" % db[:2],
                                      formatversion=2,
                                      user_agent=my_agent)
+        self.logger.debug("Initialized session.")
 
     # based on https://github.com/mediawiki-utilities/python-mwapi/blob/master/demo_queries.py
     def get_content_by_revids(self, revids, batch=50):
@@ -21,8 +25,10 @@ class RevertDetector:
             if len(batch_ids) == 0:
                 break
             else:
-                doc = self.session.post(action='query', prop='revisions',
-                                        revids=batch_ids, rvprop='ids|sha1|user')
+                doc = self.session.post(action='query',
+                                        prop='revisions',
+                                        revids=batch_ids,
+                                        rvprop='ids|sha1|user')
 
                 for page_doc in doc['query']['pages']:
                     if 'revisions' in page_doc:
@@ -97,7 +103,4 @@ class RevertDetector:
                 else:
                     print("Target is not latest")
 
-
         return [item for item in dataset if item[0] not in revert_destination]
-
-

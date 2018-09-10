@@ -31,3 +31,8 @@ def load_bz2json(fname):
 def dump_bz2json(data, fname):
     with bz2.open(fname, "wt") as f:
         json.dump(data, f)
+
+
+def load_query(fname):
+    with open(fname, "r") as queryfile:
+        return queryfile.read()

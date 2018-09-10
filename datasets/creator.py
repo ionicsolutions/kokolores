@@ -28,34 +28,30 @@ import os
 import time
 
 from reverts import RevertDetector
-
-
-def load_query(fname):
-    with open(fname, "r") as queryfile:
-        return queryfile.read()
+from utils import load_query
 
 
 # Load SQL query for all manually approved revisions
 # based on https://quarry.wmflabs.org/query/27156
-MANUALLY_REVIEWED = load_query("queries/manually_reviewed.sql")
-#MANUALLY_REVIEWED_TIMEFRAME = load_query("queries/manually_reviewed_timeframe.sql")
+MANUALLY_APPROVED = load_query("queries/manually_approved.sql")
 
 # Load SQL query for potentially reverted revisions
 # based on https://quarry.wmflabs.org/query/27161
 POTENTIALLY_REVERTED = load_query("queries/potentially_reverted.sql")
-#POTENTIALLY_REVERTED_TIMEFRAME = load_query("queries/potentially_reverted_timeframe.sql")
 
 # Load SQL query for all revisions of a page
 # based on https://quarry.wmflabs.org/query/27173
-FETCH_ALL_REVISIONS = load_query("queries/all_revisions.sql")
-#FETCH_ALL_REVISIONS_TIMEFRAME = load_query("queries/all_revisions_timeframe.sql")
+ALL_REVISIONS = load_query("queries/all_revisions.sql")
+
+# Load SQL query to fetch all approved revisions of a page
+ALL_APPROVED = load_query("queries/all_approved.sql")
 
 # Load SQL query for a randomized batch of pages with flagged revision data
 RANDOM_BATCH = load_query("queries/random_batch.sql")
 
+# Load SQL query to fetch all pages with flagged revision data within
+# a certain period of time
 TIMEFRAME_BATCH = load_query("queries/timeframe_batch.sql")
-
-FETCH_ALL_APPROVED = load_query("queries/all_approved.sql")
 
 
 class Creator:
@@ -71,7 +67,6 @@ class Creator:
        Dataset creation will work for all wikis where a substantial
        amount of revisions have been reviewed through the FlaggedRevs
        extension.
-
        """
     START_DEFAULT = 20080507000000  # FlaggedRevs started on May 6th 2008
     STOP_DEFAULT = int(time.strftime("%Y%m%d%H%M%S", time.gmtime())) + 1000000
@@ -94,6 +89,8 @@ class Creator:
         """Generate a new dataset.
 
         :param size: Total size of the data set.
+        :param start: Start of the time period.
+        :param stop: End of the time period.
         :param batch_size: Number of pages to retrieve data for at once.
         :param fname: If given, store the dataset in this file (bzipped JSON)
                       and store a temporary copy after each batch. Useful for
@@ -191,7 +188,7 @@ class Creator:
     def _find_approved(self, page_id):
         """Find all manually approved revisions"""
         with self.conn.cursor() as cursor:
-            cursor.execute(MANUALLY_REVIEWED, {"page_id": page_id,
+            cursor.execute(MANUALLY_APPROVED, {"page_id": page_id,
                                                "start": self.start,
                                                "stop": self.stop})
             self.conn.commit()
@@ -213,7 +210,7 @@ class Creator:
                 return []
 
             # Retrieve all revisions of the page for revert detection
-            cursor.execute(FETCH_ALL_REVISIONS, {"page_id": page_id,
+            cursor.execute(ALL_REVISIONS, {"page_id": page_id,
                                                  "from_rev": min(candidates),
                                                  "start": self.start,
                                                  "stop": self.stop})
@@ -222,7 +219,7 @@ class Creator:
             all_revisions = [item["rev_id"] for item in result]
 
             # Retrieve all approved revisions of the page
-            cursor.execute(FETCH_ALL_APPROVED,{"page_id": page_id,
+            cursor.execute(ALL_APPROVED, {"page_id": page_id,
                                                "from_rev": min(candidates),
                                                "start": self.start,
                                                "stop": self.stop})
