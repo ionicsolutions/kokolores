@@ -85,7 +85,7 @@ class Creator:
                                       cursorclass=pymysql.cursors.DictCursor)
 
     def create(self, size=None, start=None, stop=None, batch_size=1000,
-               fname=None, resume=True, keep_tmp=False):
+               fname=None, resume=True, keep_tmp=True):
         """Generate a new dataset.
 
         :param size: Total size of the data set.
@@ -143,7 +143,7 @@ class Creator:
                 dataset.extend(self._find_approved(page_id))
                 dataset.extend(self._find_reverted(page_id))
 
-            self.logger.info("Dataset has %d entries now.")
+            self.logger.info("Dataset has %d entries now.", len(dataset))
 
             if size is not None:
                 if len(dataset) >= size:
@@ -167,10 +167,12 @@ class Creator:
             json.dump(data, f)
 
     def _load(self, fname):
+        self.logger.info("Loading data from file %s", fname)
         with bz2.open(fname, "rt") as f:
             return json.load(f)
 
     def _get_random_batch(self, size=1000):
+        self.logger.info("Get random batch of size %d", size)
         while True:
             with self.conn.cursor() as cursor:
                 cursor.execute(RANDOM_BATCH, {"num": size})
@@ -180,12 +182,14 @@ class Creator:
             yield batch
 
     def _get_timeframe_batch(self, size=1000):
+        self.logger.info("Get all pages in timeframe %d to %d",
+                         self.start, self.stop)
         with self.conn.cursor() as cursor:
             cursor.execute(TIMEFRAME_BATCH, {"start": self.start,
                                              "stop": self.stop})
             self.conn.commit()
             batch = [int(item["page_id"]) for item in cursor.fetchall()]
-        self.logger.info("Prepared batch of %d pages", len(batch))
+        self.logger.info("Prepared timeframe batch of %d pages", len(batch))
         for i in range(0, len(batch), size):
             yield batch[i:i + size]
 
@@ -235,4 +239,5 @@ class Creator:
                                             all_approved_revisions)
 
     def __del__(self):
+        self.logger.info("Closing database connection")
         self.conn.close()

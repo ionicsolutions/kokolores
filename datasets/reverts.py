@@ -89,7 +89,7 @@ class RevertDetector:
                                        if rev_id < candidate["rev_id"]])
                 print("Latest approved revision is %d" % latest_approved)
 
-                if (latest_approved == reverted_to["rev_id"]):
+                if latest_approved == reverted_to["rev_id"]:
                     if candidate["rev_id"] in candidates:
                         self_revert = candidate["user"] == reverted_to["user"]
                         if not self_revert:

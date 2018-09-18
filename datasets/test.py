@@ -3,6 +3,7 @@ import logging
 from creator import Creator
 
 logging.basicConfig(level=logging.INFO)
+logging.getLogger('requests').setLevel(logging.WARNING)
 logger = logging.getLogger()
 fh = logging.FileHandler("creator.log")
 logger.addHandler(fh)
