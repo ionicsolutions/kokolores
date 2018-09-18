@@ -134,6 +134,7 @@ class Creator:
             get_batch = self._get_random_batch
 
         for batch in get_batch(batch_size):
+            self.logger.info("Processing batch of %d pages", len(batch))
             batch = [page_id for page_id in batch
                      if page_id not in pages]
             pages.extend(batch)
@@ -141,6 +142,8 @@ class Creator:
             for page_id in batch:
                 dataset.extend(self._find_approved(page_id))
                 dataset.extend(self._find_reverted(page_id))
+
+            self.logger.info("Dataset has %d entries now.")
 
             if size is not None:
                 if len(dataset) >= size:
@@ -159,6 +162,7 @@ class Creator:
         return dataset
 
     def _store(self, fname, data):
+        self.logger.info("Writing data to file %s", fname)
         with bz2.open(fname, "wt") as f:
             json.dump(data, f)
 
@@ -186,7 +190,7 @@ class Creator:
             yield batch[i:i + size]
 
     def _find_approved(self, page_id):
-        """Find all manually approved revisions"""
+        """Find all manually approved revisions of a page."""
         with self.conn.cursor() as cursor:
             cursor.execute(MANUALLY_APPROVED, {"page_id": page_id,
                                                "start": self.start,
@@ -211,9 +215,9 @@ class Creator:
 
             # Retrieve all revisions of the page for revert detection
             cursor.execute(ALL_REVISIONS, {"page_id": page_id,
-                                                 "from_rev": min(candidates),
-                                                 "start": self.start,
-                                                 "stop": self.stop})
+                                           "from_rev": min(candidates),
+                                           "start": self.start,
+                                           "stop": self.stop})
             self.conn.commit()
             result = cursor.fetchall()
             all_revisions = [item["rev_id"] for item in result]
