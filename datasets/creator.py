@@ -26,6 +26,7 @@ import json
 import bz2
 import os
 import time
+import itertools
 
 from reverts import RevertDetector
 from utils import load_query
@@ -184,14 +185,18 @@ class Creator:
     def _get_timeframe_batch(self, size=1000):
         self.logger.info("Get all pages in timeframe %d to %d",
                          self.start, self.stop)
-        with self.conn.cursor() as cursor:
-            cursor.execute(TIMEFRAME_BATCH, {"start": self.start,
-                                             "stop": self.stop})
-            self.conn.commit()
-            batch = [int(item["page_id"]) for item in cursor.fetchall()]
-        self.logger.info("Prepared timeframe batch of %d pages", len(batch))
-        for i in range(0, len(batch), size):
-            yield batch[i:i + size]
+        for offset in itertools.count(step=size):
+            with self.conn.cursor() as cursor:
+                cursor.execute(TIMEFRAME_BATCH, {"start": self.start,
+                                                 "stop": self.stop,
+                                                 "offset": offset,
+                                                 "number": size})
+                self.conn.commit()
+                batch = [int(item["page_id"]) for item in cursor.fetchall()]
+            if len(batch) < 1:
+                break
+            self.logger.info("Prepared timeframe batch of %d pages", len(batch))
+            yield batch
 
     def _find_approved(self, page_id):
         """Find all manually approved revisions of a page."""
