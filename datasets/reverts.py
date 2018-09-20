@@ -81,7 +81,8 @@ class RevertDetector:
                 # revision prior to the revert, i.e. what the reverting user
                 # saw when making their decision
                 candidate = max(reverteds, key=lambda item: item["rev_id"])
-                print("Candidate %s out of %s" % (candidate, reverteds))
+                print("Candidate %s out of %s" % (candidate["rev_id"],
+                                                  [k["rev_id"] for k in reverteds]))
 
                 # filter out reverts whose target is not the latest approved
                 # revision (that's beyond the scope of kokolores)
