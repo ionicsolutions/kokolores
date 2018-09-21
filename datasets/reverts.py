@@ -1,6 +1,7 @@
 import mwapi
 import mwreverts
 import logging
+import time
 
 from itertools import islice
 logging.basicConfig(level=logging.DEBUG)
@@ -25,10 +26,21 @@ class RevertDetector:
             if len(batch_ids) == 0:
                 break
             else:
-                doc = self.session.post(action='query',
-                                        prop='revisions',
-                                        revids=batch_ids,
-                                        rvprop='ids|sha1|user')
+                while True:
+                    attempt = 0
+                    try:
+                        doc = self.session.post(action='query',
+                                                prop='revisions',
+                                                revids=batch_ids,
+                                                rvprop='ids|sha1|user')
+                    except Exception as e:
+                        self.logger.warning("API call failed: %s", e)
+                        time.sleep(5)
+                        attempt += 1
+                        if attempt > 5:
+                            raise Exception
+                    else:
+                        break
 
                 for page_doc in doc['query']['pages']:
                     if 'revisions' in page_doc:
