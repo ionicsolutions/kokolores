@@ -19,18 +19,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-import logging
-import pymysql
-import toolforge
-import json
 import bz2
+import itertools
+import json
+import logging
 import os
 import time
-import itertools
+
+import pymysql
+import toolforge
 
 from reverts import RevertDetector
 from utils import load_query
-
 
 # Load SQL query for all manually approved revisions
 # based on https://quarry.wmflabs.org/query/27156
@@ -233,9 +233,9 @@ class Creator:
 
             # Retrieve all approved revisions of the page
             cursor.execute(ALL_APPROVED, {"page_id": page_id,
-                                               "from_rev": min(candidates),
-                                               "start": self.start,
-                                               "stop": self.stop})
+                                          "from_rev": min(candidates),
+                                          "start": self.start,
+                                          "stop": self.stop})
             self.conn.commit()
             result = cursor.fetchall()
             all_approved_revisions = [item["rev_id"] for item in result]
